@@ -1,1 +1,158 @@
-<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Personal Cash Flow Dashboard</title></head><body><h1>Personal Cash Flow Dashboard</h1><p>Deployment placeholder.</p></body></html>
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Personal Cash Flow Dashboard</title>
+<style>
+:root{--bg:#f5f6f8;--card:#fff;--text:#17181a;--muted:#69707a;--border:#e1e4e8;--accent:#5b5ce2;--danger:#b42318;--success:#16794c}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;color:var(--text);-webkit-text-size-adjust:100%;overflow-x:hidden}
+.wrap{width:100%;max-width:1180px;margin:0 auto;padding:clamp(18px,4vw,32px) clamp(12px,4vw,20px) 50px}.header{display:flex;justify-content:space-between;gap:20px;align-items:flex-end;margin-bottom:20px}
+h1{font-size:30px;margin:0 0 5px}.sub{color:var(--muted);font-size:14px}
+.panel,.metric{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:20px;margin-bottom:16px}
+h2{font-size:16px;margin:0 0 16px}.grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px}.grid3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
+label{display:block;font-size:12px;color:var(--muted);margin-bottom:6px}input{width:100%;min-height:44px;padding:10px 11px;border:1px solid var(--border);border-radius:9px;font-size:16px;background:#fff;color:var(--text);-webkit-appearance:none}
+input:focus{outline:2px solid var(--accent);outline-offset:1px}.metrics{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:12px;margin-bottom:16px}.metric{margin:0}.metric .label{font-size:12px;color:var(--muted)}.metric .value{font-size:22px;font-weight:750;margin-top:6px}.danger{color:var(--danger)}.success{color:var(--success)}
+.actions{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:16px}button{border:0;border-radius:9px;padding:11px 14px;min-height:44px;font-weight:650;cursor:pointer;background:#ececff;color:#202124;touch-action:manipulation}button.primary{background:var(--accent);color:#fff}
+.table-wrap{overflow:auto;border:1px solid var(--border);border-radius:12px}table{border-collapse:collapse;width:100%;min-width:1000px;font-size:12px}th,td{padding:10px;border-bottom:1px solid var(--border);text-align:right;white-space:nowrap}th:first-child,td:first-child{text-align:left;position:sticky;left:0;background:#fff}th{background:#fafafa;color:var(--muted);font-weight:700}tr:last-child td{border-bottom:0}
+.chart{height:250px;display:flex;align-items:end;gap:8px;padding:12px 6px 0;border-bottom:1px solid var(--border)}.bar{flex:1;min-width:8px;position:relative;display:flex;align-items:end;gap:2px;height:100%}.bar span{display:block;width:50%;border-radius:4px 4px 0 0}.bar .exp{background:#9aa0a6}.bar .inc{background:var(--accent)}.barlabel{font-size:9px;color:var(--muted);position:absolute;bottom:-17px;width:100%;text-align:center}
+.note{font-size:12px;color:var(--muted);line-height:1.5}
+@media(max-width:850px){.grid{grid-template-columns:repeat(2,1fr)}.metrics{grid-template-columns:repeat(2,1fr)}.grid3{grid-template-columns:1fr}}
+@media(max-width:680px){
+      .wrap{padding:18px 10px 44px}
+      .grid,.metrics,.grid3{grid-template-columns:1fr}
+      .header{align-items:flex-start}
+      h1{font-size:24px;line-height:1.15}
+      .sub{font-size:13px;line-height:1.4}
+      .panel{padding:14px;border-radius:13px;margin-bottom:12px}
+      .metric{padding:14px}
+      .metric .value{font-size:21px}
+      .table-wrap{margin-left:-2px;margin-right:-2px;border-radius:10px}
+      .chart{height:210px;gap:4px;padding-left:2px;padding-right:2px}
+      .barlabel{font-size:8px}
+      .actions{display:grid;grid-template-columns:1fr}
+      .actions button{width:100%}
+    }
+    @media(max-width:380px){
+      h1{font-size:22px}
+      .chart{height:185px}
+      .panel{padding:12px}
+    }
+</style>
+</head>
+<body>
+<div class="wrap">
+<header class="header">
+<div><h1>Personal Cash Flow Dashboard</h1><div class="sub">Operational expenses and recurring income projection. Fixed/immovable assets are excluded from cash flow.</div></div>
+</header>
+
+<section class="panel">
+<h2>Model setup</h2>
+<div class="grid">
+<div><label>Starting year</label><input id="startYear" type="number" value="2027"></div>
+<div><label>Starting age</label><input id="startAge" type="number" value="49"></div>
+<div><label>Projection / working years</label><input id="years" type="number" value="15" min="1" max="50"></div>
+<div><label>Currency symbol</label><input id="currency" value="₹" maxlength="3"></div>
+</div>
+</section>
+
+<section class="panel">
+<h2>Expense assumptions</h2>
+<div class="grid">
+<div><label>Home expenses / year</label><input id="home" type="number" value="1100000"></div>
+<div><label>Home annual growth %</label><input id="homeGrowth" type="number" value="5" step=".1"></div>
+<div><label>Medical / year</label><input id="medical" type="number" value="72000"></div>
+<div><label>Medical annual growth %</label><input id="medGrowth" type="number" value="4" step=".1"></div>
+<div><label>Mediclaim / year</label><input id="mediclaim" type="number" value="60000"></div>
+<div><label>Insurance / year</label><input id="insurance" type="number" value="710700"></div>
+<div><label>Tour / year</label><input id="tour" type="number" value="1000000"></div>
+<div><label>Tour annual growth %</label><input id="tourGrowth" type="number" value="10" step=".1"></div>
+<div><label>Miscellaneous / year</label><input id="misc" type="number" value="3825000"></div>
+<div><label>Car EMI / year</label><input id="car" type="number" value="420000"></div>
+<div><label>MF investment / year</label><input id="mfOut" type="number" value="800000"></div>
+<div><label>Business expense / year</label><input id="business" type="number" value="2000000"></div>
+<div><label>LIC / year</label><input id="lic" type="number" value="0"></div>
+</div>
+</section>
+
+<section class="panel">
+<h2>Income assumptions</h2>
+<div class="grid">
+<div><label>MF income / year</label><input id="mfIn" type="number" value="753333.33"></div>
+<div><label>FD interest / year</label><input id="fd" type="number" value="490000"></div>
+<div><label>Rent / year</label><input id="rent" type="number" value="1260000"></div>
+<div><label>Rent annual growth %</label><input id="rentGrowth" type="number" value="8" step=".1"></div>
+</div>
+</section>
+
+<div class="metrics">
+<div class="metric"><div class="label">Total expenses</div><div id="totalExp" class="value">—</div></div>
+<div class="metric"><div class="label">Total operating income</div><div id="totalInc" class="value">—</div></div>
+<div class="metric"><div class="label">Total deficit</div><div id="deficit" class="value danger">—</div></div>
+<div class="metric"><div class="label">Avg annual deficit</div><div id="annualDef" class="value danger">—</div></div>
+<div class="metric"><div class="label">Avg monthly deficit</div><div id="monthlyDef" class="value danger">—</div></div>
+</div>
+
+<section class="panel">
+<h2>Expenses vs income</h2>
+<div id="chart" class="chart"></div>
+<div class="note">Grey = annual operating expenses · Purple = annual operating income. The chart updates as you edit assumptions.</div>
+</section>
+
+<section class="panel">
+<h2>Year-by-year projection</h2>
+<div class="table-wrap"><table><thead><tr>
+<th>Year / Age</th><th>Home</th><th>Medical</th><th>Tour</th><th>Rent</th><th>Total expenses</th><th>Total income</th><th>Net cash flow</th><th>Monthly net</th>
+</tr></thead><tbody id="rows"></tbody></table></div>
+</section>
+
+<div class="actions"><button id="reset">Reset to sheet defaults</button><button id="downloadCsv" class="primary">Download projection CSV</button></div>
+<p class="note">Model logic: operating expenses = Home + Medical + Mediclaim + Insurance + Tour + Miscellaneous + Car EMI + MF investment + Business + LIC. Operating income = MF income + FD interest + Rent. Net cash flow = income − expenses. Fixed/immovable asset values are intentionally not included as income.</p>
+</div>
+
+<script>
+(function(){
+const ids=["startYear","startAge","years","currency","home","homeGrowth","medical","medGrowth","mediclaim","insurance","tour","tourGrowth","misc","car","mfOut","business","lic","mfIn","fd","rent","rentGrowth"];
+const defaults={};ids.forEach(id=>defaults[id]=document.getElementById(id).value);
+const el=id=>document.getElementById(id);
+const num=id=>{const x=parseFloat(el(id).value);return Number.isFinite(x)?x:0};
+const money=x=>(el("currency").value||"₹").slice(0,3)+Math.round(x).toLocaleString("en-IN");
+let data=[];
+
+function calculate(){
+ const years=Math.max(1,Math.min(50,Math.round(num("years"))));
+ const sy=Math.round(num("startYear")),sa=Math.round(num("startAge"));
+ const hg=num("homeGrowth")/100,mg=num("medGrowth")/100,tg=num("tourGrowth")/100,rg=num("rentGrowth")/100;
+ data=[];let totalExp=0,totalInc=0;
+ for(let i=0;i<years;i++){
+  const home=num("home")*Math.pow(1+hg,i);
+  const medical=num("medical")*Math.pow(1+mg,i);
+  const tour=num("tour")*Math.pow(1+tg,i);
+  const rent=num("rent")*Math.pow(1+rg,i);
+  const exp=home+medical+num("mediclaim")+num("insurance")+tour+num("misc")+num("car")+num("mfOut")+num("business")+num("lic");
+  const inc=num("mfIn")+num("fd")+rent;
+  const net=inc-exp;
+  data.push({year:sy+i,age:sa+i,home,medical,tour,rent,exp,inc,net});
+  totalExp+=exp;totalInc+=inc;
+ }
+ const deficit=totalExp-totalInc;
+ el("totalExp").textContent=money(totalExp);el("totalInc").textContent=money(totalInc);el("deficit").textContent=money(deficit);
+ el("annualDef").textContent=money(deficit/years);el("monthlyDef").textContent=money(deficit/years/12);
+ el("rows").innerHTML=data.map(r=>`<tr><td>${r.year} / ${r.age}</td><td>${money(r.home)}</td><td>${money(r.medical)}</td><td>${money(r.tour)}</td><td>${money(r.rent)}</td><td>${money(r.exp)}</td><td>${money(r.inc)}</td><td class="${r.net<0?"danger":"success"}">${money(r.net)}</td><td class="${r.net<0?"danger":"success"}">${money(r.net/12)}</td></tr>`).join("");
+ const max=Math.max(...data.map(r=>Math.max(r.exp,r.inc)),1);
+ el("chart").innerHTML=data.map(r=>`<div class="bar" title="${r.year}: Expenses ${money(r.exp)} | Income ${money(r.inc)}"><span class="exp" style="height:${r.exp/max*100}%"></span><span class="inc" style="height:${r.inc/max*100}%"></span><div class="barlabel">${r.year}</div></div>`).join("");
+}
+
+ids.forEach(id=>el(id).addEventListener("input",calculate));
+el("reset").addEventListener("click",()=>{ids.forEach(id=>el(id).value=defaults[id]);calculate()});
+el("downloadCsv").addEventListener("click",()=>{
+ const header=["Year","Age","Home","Medical","Tour","Rent","Total Expenses","Total Income","Net Cash Flow","Monthly Net"];
+ const lines=[header,...data.map(r=>[r.year,r.age,r.home,r.medical,r.tour,r.rent,r.exp,r.inc,r.net,r.net/12])].map(row=>row.join(","));
+ const blob=new Blob([lines.join("\\n")],{type:"text/csv"}),url=URL.createObjectURL(blob),a=document.createElement("a");
+ a.href=url;a.download="cash-flow-projection.csv";a.click();URL.revokeObjectURL(url);
+});
+calculate();
+})();
+</script>
+</body>
+</html>
